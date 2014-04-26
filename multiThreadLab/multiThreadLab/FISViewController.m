@@ -2,11 +2,12 @@
 //  FISViewController.m
 //  multiThreadLab
 //
-//  Created by Joe Burgess on 4/26/14.
+//  Created by Joe Burgess on 3/24/14.
 //  Copyright (c) 2014 Joe Burgess. All rights reserved.
 //
 
 #import "FISViewController.h"
+#import "FISZipSearchOperation.h"
 
 @interface FISViewController ()
 @property (weak, nonatomic) IBOutlet UITextField *zipCode;
@@ -15,25 +16,20 @@
 @property (weak, nonatomic) IBOutlet UILabel *stateLabel;
 @property (weak, nonatomic) IBOutlet UILabel *latitudeLabel;
 @property (weak, nonatomic) IBOutlet UILabel *longitudeLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *flagImage;
 - (IBAction)searchZipCodeTapped:(id)sender;
+- (void) setRandomBGColor;
+
 @end
 
 @implementation FISViewController
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     self.view.accessibilityLabel=@"Main View";
-    // Do any additional setup after loading the view.
+	// Do any additional setup after loading the view, typically from a nib.
+    [NSTimer scheduledTimerWithTimeInterval:.25 target:self selector:@selector(setRandomBGColor) userInfo:nil repeats:YES];
 }
 
 - (void)didReceiveMemoryWarning
@@ -42,15 +38,34 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (IBAction)searchZipCodeTapped:(id)sender {
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    FISZipSearchOperation *searchOp = [[FISZipSearchOperation alloc] init];
+    searchOp.searchZipCode=self.zipCode.text;
+    searchOp.zipCodeBlock = ^void(FISZipCode *zipCode, NSError *error)
+    {
+        if (zipCode) {
+            self.countyLabel.text=zipCode.county;
+            self.latitudeLabel.text=zipCode.latitude;
+            self.longitudeLabel.text=zipCode.longitude;
+            self.cityLabel.text=zipCode.city;
+            self.stateLabel.text=zipCode.state;
+        } else
+        {
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Zip Code Error" message:error.localizedDescription delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [alertView show];
+        }
+    };
+    [queue addOperation:searchOp];
+    [self.zipCode resignFirstResponder];
 }
-*/
 
+- (void)setRandomBGColor
+{
+    CGFloat hue = ( arc4random() % 256 / 256.0 );  //  0.0 to 1.0
+    CGFloat saturation = ( arc4random() % 128 / 256.0 ) + 0.5;  //  0.5 to 1.0, away from white
+    CGFloat brightness = ( arc4random() % 128 / 256.0 ) + 0.5;  //  0.5 to 1.0, away from black
+    UIColor *color = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
+    self.view.backgroundColor = color;
+}
 @end
