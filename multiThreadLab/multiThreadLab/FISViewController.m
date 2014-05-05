@@ -7,6 +7,7 @@
 //
 
 #import "FISViewController.h"
+#import "FISZipSearchOperation.h"
 
 @interface FISViewController ()<UITextFieldDelegate>
 
@@ -16,14 +17,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *stateLabel;
 @property (weak, nonatomic) IBOutlet UILabel *latitudeLabel;
 @property (weak, nonatomic) IBOutlet UILabel *longitudeLabel;
-
-@property (nonatomic) NSMutableArray *zipCodes;
-@property (nonatomic) NSMutableArray *lats;
-@property (nonatomic) NSMutableArray *longs;
-@property (nonatomic) NSMutableArray *cities;
-@property (nonatomic) NSMutableArray *states;
-@property (nonatomic) NSMutableArray *counties;
-
 
 - (IBAction)searchZipCodeTapped:(id)sender;
 @end
@@ -47,7 +40,7 @@
     
     self.zipCode.delegate = self;
     
-    [self parseCSV];
+    //[self parseCSV];
     [NSTimer scheduledTimerWithTimeInterval:.25 target:self selector:@selector(changeBackgroundColor) userInfo:nil repeats:YES];
 }
 
@@ -77,114 +70,47 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)zipCodeError
-{
-    UIAlertView *zipCodeError = [[UIAlertView alloc] initWithTitle:@"Zip Code Error" message:@"Zip Codes need to be 5 digits" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
-    
-    zipCodeError.accessibilityLabel = @"Zip Code Error";
-    
-    [zipCodeError show];
-}
 
 - (IBAction)searchZipCodeTapped:(id)sender
 {
-    if ([self.zipCode.text length] == 0 || [self.zipCode.text length] < 5 || [self.zipCode.text length] > 5)
-    {
-        [self zipCodeError];
-    }
-    else
-    {
-        [self lookupZipCode];
-    }
+    [self lookupZipCode];
 }
 
 - (void)lookupZipCode
 {
-    if ([self.zipCodes containsObject:self.zipCode.text])
-    {
-        NSUInteger index = [self.zipCodes indexOfObject:self.zipCode.text];
-        
-        self.countyLabel.text = self.counties[index];
-        self.cityLabel.text = self.cities[index];
-        self.stateLabel.text = self.states[index];
-        self.latitudeLabel.text = self.lats[index];
-        self.longitudeLabel.text = self.longs[index];
-        
-    }
-    else
-    {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Zip Code Error" message:@"Couldn't find that zip code" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
-        alertView.accessibilityLabel = @"Zip Code Error";
-        [alertView show]; 
-    }
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
     
-    [self.zipCode resignFirstResponder];
-}
-
-- (void)parseCSV
-{
-    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"zip_codes_states" ofType:@"csv"];
-    NSError *error;
-    NSString *contents = [NSString stringWithContentsOfURL:[NSURL fileURLWithPath:filePath] encoding:NSUTF8StringEncoding error:&error];
+    FISZipSearchOperation *zipCodeOp = [[FISZipSearchOperation alloc] init];
+    zipCodeOp.searchZipCode = self.zipCode.text;
     
-    if (!error)
-    {
-        NSArray *rows = [contents componentsSeparatedByString:@"\n"];
-        
-        self.zipCodes = [NSMutableArray new];
-        self.lats = [NSMutableArray new];
-        self.longs = [NSMutableArray new];
-        self.cities = [NSMutableArray new];
-        self.states = [NSMutableArray new];
-        self.counties = [NSMutableArray new];
-        
-        for (NSString *row in rows)
+    zipCodeOp.zipCodeBlock = ^void(FISZipCode *zipCode, NSError *error){
+        if (!error)
         {
-            NSArray *columns = [row componentsSeparatedByString:@","];
-            for (NSInteger x = 0; x < 6; x++)
+            self.countyLabel.text = zipCode.county;
+            self.cityLabel.text = zipCode.city;
+            self.stateLabel.text = zipCode.state;
+            self.latitudeLabel.text = zipCode.latitude;
+            self.longitudeLabel.text = zipCode.longitude;
+        }
+        else
+        {
+            if (error.code == 100)
             {
-                if ([columns count] == 6)
-                {
-                    switch (x) {
-                        case 0:
-                            [self.zipCodes addObject:[FISViewController sanitizeString:columns[x]]];
-                            break;
-                        case 1:
-                            [self.lats addObject:[FISViewController sanitizeString:columns[x]]];
-                            break;
-                        case 2:
-                            [self.longs addObject:[FISViewController sanitizeString:columns[x]]];
-                            break;
-                        case 3:
-                            [self.cities addObject:[FISViewController sanitizeString:columns[x]]];
-                            break;
-                        case 4:
-                            [self.states addObject:[FISViewController sanitizeString:columns[x]]];
-                            break;
-                        case 5:
-                            [self.counties addObject:[FISViewController sanitizeString:columns[x]]];
-                            break;
-                            
-                        default:
-                            break;
-                    }
-                }
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Zip Code Error" message:@"Couldn't find that zip code" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+                alertView.accessibilityLabel = @"Zip Code Error";
+                [alertView show];
+            }
+            else if (error.code == 101)
+            {
+                UIAlertView *zipCodeError = [[UIAlertView alloc] initWithTitle:@"Zip Code Error" message:@"Zip Codes need to be 5 digits" delegate:self cancelButtonTitle:nil otherButtonTitles:@"OK", nil];
+                zipCodeError.accessibilityLabel = @"Zip Code Error";
+                [zipCodeError show];
             }
         }
-        
-        [self.zipCodes removeObjectAtIndex:0];
-        [self.lats removeObjectAtIndex:0];
-        [self.longs removeObjectAtIndex:0];
-        [self.cities removeObjectAtIndex:0];
-        [self.states removeObjectAtIndex:0];
-        [self.counties removeObjectAtIndex:0];
-    }
+    };
+    
+    [queue addOperation:zipCodeOp];
+    [self.zipCode resignFirstResponder];
 }
-
-+ (NSString *)sanitizeString:(NSString *)string
-{
-    return [[[string stringByReplacingOccurrencesOfString:@"\"" withString:@""] stringByReplacingOccurrencesOfString:@" " withString:@""] stringByReplacingOccurrencesOfString:@"\r" withString:@""];
-}
-
 
 @end
