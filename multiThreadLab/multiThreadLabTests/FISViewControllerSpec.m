@@ -38,7 +38,6 @@ describe(@"FISViewController", ^{
         UIColor *before = [UIColor colorWithCGColor:backgroundView.backgroundColor.CGColor];
         [tester waitForTimeInterval:1.0];
         expect(before).willNot.equal(backgroundView.backgroundColor);
-
     });
 
     it(@"should work with a valid zip code", ^{
