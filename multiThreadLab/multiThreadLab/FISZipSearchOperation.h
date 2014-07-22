@@ -11,7 +11,6 @@
 
 @interface FISZipSearchOperation : NSOperation
 
-//@property (nonatomic)(^void(FISZipCode *zipCode, NSError *error))zipCodeBlock;
 @property (nonatomic, copy) void(^zipCodeBlock)(FISZipCode *zipCode, NSError *error);
 @property (nonatomic) NSString *searchZipCode; 
 

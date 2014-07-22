@@ -12,29 +12,31 @@
 
 - (void)main
 {
-    if ([self.searchZipCode length] != 5)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSError *error = [NSError errorWithDomain:@"Zip Codes Need to be 5 digits" code:101 userInfo:@{NSLocalizedDescriptionKey : @"Zip Codes need to be 5 digits"}];
-            self.zipCodeBlock(nil, error);
-        });
-    }
-    else
-    {
-        FISZipCode *zipCode = [self findZip:self.searchZipCode];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (!zipCode)
-            {
-                
-                NSError *error = [NSError errorWithDomain:@"Couldn't find that zip code" code:100 userInfo:@{NSLocalizedDescriptionKey : @"Couldn't find that zip code"}];
+    @autoreleasepool {
+        if ([self.searchZipCode length] != 5)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSError *error = [NSError errorWithDomain:@"Zip Codes Need to be 5 digits" code:101 userInfo:@{NSLocalizedDescriptionKey : @"Zip Codes need to be 5 digits"}];
                 self.zipCodeBlock(nil, error);
-                
-            }
-            else
-            {
-                self.zipCodeBlock(zipCode, nil);
-            }
-        });
+            });
+        }
+        else
+        {
+            FISZipCode *zipCode = [self findZip:self.searchZipCode];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (!zipCode)
+                {
+                    
+                    NSError *error = [NSError errorWithDomain:@"Couldn't find that zip code" code:100 userInfo:@{NSLocalizedDescriptionKey : @"Couldn't find that zip code"}];
+                    self.zipCodeBlock(nil, error);
+                    
+                }
+                else
+                {
+                    self.zipCodeBlock(zipCode, nil);
+                }
+            });
+        }
     }
 }
 

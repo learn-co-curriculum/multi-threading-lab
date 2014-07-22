@@ -16,6 +16,7 @@
 
 SpecBegin(FISViewController)
 
+__block NSString *myString;
 
 describe(@"FISViewController", ^{
     __block Swizzlean *swizzle;
