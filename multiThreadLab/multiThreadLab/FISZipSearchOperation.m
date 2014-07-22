@@ -12,6 +12,7 @@
 
 -(void)main
 {
+    @autoreleasepool {
     if ([self.searchZipCode length]!=5)
     {
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
@@ -56,6 +57,7 @@
             self.zipCodeBlock(nil,error);
         }];
         return;
+    }
     }
 }
 @end
