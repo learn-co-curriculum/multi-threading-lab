@@ -1,7 +1,4 @@
----
-tags: multi-threading, nsoperation
-languages: objective-c
----
+
 
 # Multi-Threading Lab
 
