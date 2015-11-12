@@ -46,6 +46,7 @@
 }
 
 -(void)searchZipCodeTapped:(id)sender
+
 {
     if ([self.zipCode.text length]!=5)
     {
@@ -68,7 +69,7 @@
                 NSString *city = [items[3] stringByReplacingOccurrencesOfString:@"\"" withString:@""];
                 NSString *state = [items[4] stringByReplacingOccurrencesOfString:@"\"" withString:@""];
                 NSString *county = [items[5] stringByReplacingOccurrencesOfString:@"\"" withString:@""];
-
+                
                 if ([zip isEqualToString:self.zipCode.text]) {
                     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                         self.cityLabel.text=city;
@@ -101,4 +102,8 @@
     UIColor *color = [UIColor colorWithHue:hue saturation:saturation brightness:brightness alpha:1];
     self.view.backgroundColor = color;
 }
+
+
 @end
+
+
