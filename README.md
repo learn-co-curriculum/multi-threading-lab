@@ -43,4 +43,4 @@ Your goal is to make a zip code look-up application. Sadly, that is uninterestin
     NSString *contents = [NSString stringWithContentsOfURL:[NSURL fileURLWithPath:filePath] encoding:NSUTF8StringEncoding error:nil];
   ```
 
-<a href='https://learn.co/lessons/multi-threading-lab' data-visibility='hidden'>View this lesson on Learn.co</a>
+<p data-visibility='hidden'>View <a href='https://learn.co/lessons/multi-threading-lab' title='Multi-Threading Lab'>Multi-Threading Lab</a> on Learn.co and start learning to code for free.</p>
