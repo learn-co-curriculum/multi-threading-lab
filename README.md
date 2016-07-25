@@ -40,7 +40,7 @@ Your goal is to make a zip code look-up application. Sadly, that is uninterestin
 
   ```objc
   NSString *filePath = [[NSBundle mainBundle] pathForResource:@"zip_codes_states" ofType:@"csv"];
-    NSString *contents = [NSString stringWithContentsOfURL:[NSURL fileURLWithPath:filePath] encoding:NSUTF8StringEncoding error:nil];
+  NSString *contents = [NSString stringWithContentsOfURL:[NSURL fileURLWithPath:filePath] encoding:NSUTF8StringEncoding error:nil];
   ```
 
 <p data-visibility='hidden'>View <a href='https://learn.co/lessons/multi-threading-lab' title='Multi-Threading Lab'>Multi-Threading Lab</a> on Learn.co and start learning to code for free.</p>
